@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ID Photo Validator</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    .card { border: 1px solid #ccc; border-radius: 8px; padding: 16px; max-width: 640px; }
+    .row { margin-bottom: 12px; }
+    #result { white-space: pre-wrap; font-family: Consolas, monospace; background: #f7f7f7; padding: 12px; border-radius: 6px; }
+    button { padding: 8px 14px; }
+  </style>
+</head>
+<body>
+  <h1>ID Photo Validator</h1>
+  <div class="card">
+    <div class="row">
+      <label for="photo">Upload photo (.jpg/.png):</label><br />
+      <input type="file" id="photo" accept="image/*" />
+    </div>
+    <div class="row">
+      <button id="submit">Validate</button>
+    </div>
+    <div class="row">
+      <strong>Status:</strong> <span id="status">Idle</span>
+    </div>
+    <div class="row">
+      <div id="result">Result will appear here.</div>
+    </div>
+  </div>
+
+  <script>
+    const submitBtn = document.getElementById('submit');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+
+    submitBtn.addEventListener('click', async () => {
+      const fileInput = document.getElementById('photo');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Please choose a photo.');
+        return;
+      }
+      const file = fileInput.files[0];
+      const form = new FormData();
+      form.append('file', file);
+
+      statusEl.textContent = 'Uploading...';
+      resultEl.textContent = '';
+
+      try {
+        const resp = await fetch('/validate', { method: 'POST', body: form });
+        const data = await resp.json();
+        statusEl.textContent = `HTTP ${resp.status}`;
+        resultEl.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        statusEl.textContent = 'Error';
+        resultEl.textContent = err?.message || String(err);
+      }
+    });
+  </script>
+</body>
+</html>
